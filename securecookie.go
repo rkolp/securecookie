@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"hash"
 	"io"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -325,6 +326,7 @@ func (s *SecureCookie) Decode(name, value string, dst interface{}) error {
 	h := hmac.New(s.hashFunc, s.hashKey)
 	b = append([]byte(name+"|"), b[:len(b)-len(parts[2])-1]...)
 	if err = verifyMac(h, b, parts[2]); err != nil {
+		log.Println("error in verify mac")
 		return err
 	}
 	// 4. Verify date ranges.
@@ -342,15 +344,18 @@ func (s *SecureCookie) Decode(name, value string, dst interface{}) error {
 	// 5. Decrypt (optional).
 	b, err = decode(parts[1])
 	if err != nil {
+		log.Println("error in decode")
 		return err
 	}
 	if s.block != nil {
 		if b, err = decrypt(s.block, b); err != nil {
+			log.Println("error is decrypt")
 			return err
 		}
 	}
 	// 6. Deserialize.
 	if err = s.sz.Deserialize(b, dst); err != nil {
+		log.Println("error is deserialize")
 		return cookieError{cause: err, typ: decodeError}
 	}
 	// Done.
