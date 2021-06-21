@@ -303,14 +303,17 @@ func (s *SecureCookie) Encode(name string, value interface{}) (string, error) {
 // argument is where the cookie will be decoded. It must be a pointer.
 func (s *SecureCookie) Decode(name, value string, dst interface{}) error {
 	if s.err != nil {
+		log.Println("error already was bad")
 		return s.err
 	}
 	if s.hashKey == nil {
+		log.Println("no hash key")
 		s.err = errHashKeyNotSet
 		return s.err
 	}
 	// 1. Check length.
 	if s.maxLength != 0 && len(value) > s.maxLength {
+		log.Println("val to decode is too long")
 		return errValueToDecodeTooLong
 	}
 	// 2. Decode from base64.
@@ -321,6 +324,7 @@ func (s *SecureCookie) Decode(name, value string, dst interface{}) error {
 	// 3. Verify MAC. Value is "date|value|mac".
 	parts := bytes.SplitN(b, []byte("|"), 3)
 	if len(parts) != 3 {
+		log.Println("mac invalid")
 		return ErrMacInvalid
 	}
 	h := hmac.New(s.hashFunc, s.hashKey)
